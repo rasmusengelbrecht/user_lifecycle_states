@@ -1,0 +1,1 @@
+select * from main.dim_users

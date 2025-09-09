@@ -62,15 +62,15 @@ def setup_environment():
         run_command("npm install", cwd=evidence_dir, description="Installing Evidence dependencies")
 
 
-def extract_data():
-    """Run the dlt extraction pipeline."""
-    console.print(Panel("📥 Extracting data from Jaffle Shop API", style="green"))
+def generate_data():
+    """Generate synthetic user and transaction data."""
+    console.print(Panel("📊 Generating synthetic user and transaction data", style="green"))
     
-    # Change to dlt_pipeline directory and run extraction
+    # Change to data_generation directory and run generation
     run_command(
-        "uv run python extract.py", 
-        cwd="dlt_pipeline",
-        description="Extracting data with dlt"
+        "uv run python generate_data.py", 
+        cwd="data_generation",
+        description="Generating synthetic data"
     )
     
 
@@ -134,21 +134,21 @@ def start_dashboard():
 
 
 @click.command()
-@click.option('--extract', is_flag=True, help='Only run data extraction')
+@click.option('--generate', is_flag=True, help='Only run data generation')
 @click.option('--transform', is_flag=True, help='Only run data transformation') 
 @click.option('--dashboard', is_flag=True, help='Only start dashboard')
 @click.option('--setup', is_flag=True, help='Only setup environment')
 @click.option('--skip-setup', is_flag=True, help='Skip environment setup')
-def main(extract, transform, dashboard, setup, skip_setup):
+def main(generate, transform, dashboard, setup, skip_setup):
     """
     🏗️ Local Data Stack Orchestrator
     
-    Runs the complete data pipeline: Extract -> Transform -> Dashboard
+    Runs the complete data pipeline: Generate -> Transform -> Dashboard
     """
     
     console.print(Panel.fit(
         "🏗️ Local Data Stack\n"
-        "dlt → DuckDB → dbt → Evidence.dev",
+        "Python → DuckDB → dbt → Evidence.dev",
         style="bold blue"
     ))
     
@@ -158,8 +158,8 @@ def main(extract, transform, dashboard, setup, skip_setup):
             setup_environment()
             return
             
-        if extract:
-            extract_data()
+        if generate:
+            generate_data()
             return
             
         if transform:
@@ -174,7 +174,7 @@ def main(extract, transform, dashboard, setup, skip_setup):
         if not skip_setup:
             setup_environment()
             
-        extract_data()
+        generate_data()
         transform_data()
         start_dashboard()
         

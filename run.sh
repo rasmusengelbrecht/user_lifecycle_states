@@ -1,5 +1,5 @@
 #!/bin/bash
 # Simple wrapper script for the main orchestrator
 
-echo "🏗️ Starting Local Data Stack Pipeline..."
-uv run python localdatastack/run.py "$@"
+echo "🏗️ Starting User Analytics Pipeline..."
+uv run python user_analytics/run.py "$@"

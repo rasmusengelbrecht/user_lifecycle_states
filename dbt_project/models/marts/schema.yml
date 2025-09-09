@@ -1,54 +1,56 @@
 version: 2
 
 models:
-  - name: dim_customers
-    description: Customer dimension table with order statistics and segmentation
+  - name: dim_users
+    description: "User dimension table with behavioral metrics and segmentation"
     columns:
-      - name: customer_id
-        description: Unique customer identifier
+      - name: user_id
+        description: "Unique identifier for each user"
         tests:
-          - not_null
           - unique
-      - name: customer_name
-        description: Customer full name
+          - not_null
+      - name: user_created_at
+        description: "Date when the user was created"
         tests:
           - not_null
-      - name: total_orders
-        description: Total number of orders placed by customer
-      - name: completed_orders  
-        description: Number of completed orders
-      - name: customer_segment
-        description: Customer segmentation based on order frequency
-        tests:
-          - accepted_values:
-              values: ['Never Ordered', 'One Time', 'Regular', 'Frequent']
+      - name: total_transactions
+        description: "Total number of transactions for this user"
+      - name: first_transaction_at
+        description: "Date of user's first transaction"
+      - name: last_transaction_at
+        description: "Date of user's most recent transaction"
+      - name: user_segment
+        description: "User behavior segment based on transaction patterns"
+      - name: days_to_first_transaction
+        description: "Number of days between signup and first transaction"
 
-  - name: dim_products
-    description: Product dimension table
+  - name: fct_transactions
+    description: "Transaction fact table with user context and derived metrics"
     columns:
-      - name: product_id
-        description: Unique product identifier
+      - name: transaction_id
+        description: "Unique identifier for each transaction"
         tests:
-          - not_null
           - unique
-      - name: product_name
-        description: Product name
+          - not_null
+      - name: user_id
+        description: "Foreign key to users"
         tests:
           - not_null
-
-  - name: fct_orders
-    description: Order fact table
-    columns:
-      - name: order_id
-        description: Unique order identifier  
+      - name: transaction_created_at
+        description: "Date when the transaction occurred"
         tests:
           - not_null
-          - unique
-      - name: customer_id
-        description: Customer who placed the order
-        tests:
-          - not_null
-      - name: order_date
-        description: Date the order was placed
-        tests:
-          - not_null
+      - name: user_created_at
+        description: "Date when the user signed up"
+      - name: transaction_year
+        description: "Year the transaction occurred"
+      - name: transaction_month
+        description: "Month the transaction occurred"
+      - name: transaction_day_of_week
+        description: "Day of week (0=Sunday, 6=Saturday)"
+      - name: days_since_signup
+        description: "Days between user signup and this transaction"
+      - name: user_transaction_number
+        description: "Sequential number of this transaction for the user"
+      - name: transaction_type
+        description: "Classification of transaction (First, Early, Recurring)"

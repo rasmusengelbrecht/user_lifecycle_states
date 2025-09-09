@@ -1,130 +1,144 @@
 ---
-title: Jaffle Shop Analytics Dashboard
+title: User Analytics Dashboard
 ---
+Welcome to your user analytics dashboard.
 
-Welcome to the Jaffle Shop Analytics Dashboard! Explore customer behavior, order patterns, and product performance.
+## MAU
 
-## 📊 Key Performance Indicators
-
-```sql overview_stats
+```sql mau
+with monthly_totals as (
+    select 
+        month,
+        count(*) as total_users,
+        sum(case when is_active then 1 else 0 end) as active_users
+    from user_states_monthly
+    group by month
+)
 select 
-    count(distinct customer_id) as total_customers,
-    count(order_id) as total_orders,
-    round(count(order_id)::float / count(distinct customer_id), 1) as avg_orders_per_customer
-from jaffle_shop.orders
+    month,
+    active_users as user_count,
+    active_users / total_users as mau_percentage
+from monthly_totals
 ```
 
-<div class="grid grid-cols-3 gap-4">
-    <BigValue 
-        data={overview_stats} 
-        value=total_customers 
-        title="Total Customers"
-    />
-    <BigValue 
-        data={overview_stats} 
-        value=total_orders 
-        title="Total Orders"
-        fmt=num0
-    />
-    <BigValue 
-        data={overview_stats} 
-        value=avg_orders_per_customer 
-        title="Avg Orders/Customer"
-        fmt=num1
-    />
-</div>
+<BarChart 
+    data={mau}
+    x="month"
+    y="user_count"
+    y2="mau_percentage"
+    y2Fmt=pct0
+    title="Monthly Active Users"
+    labels=true
+    yAxisTitle="Active Users"
+    y2AxisTitle="MAU %"
+    y2SeriesType=line
+    chartAreaHeight=280
+/>
 
-## 📈 Monthly Order Trends
-
-```sql monthly_orders
+```sql monthly_dynamics
 select 
-    date_trunc('month', order_date) as month,
-    count(*) as orders
-from jaffle_shop.orders
-group by date_trunc('month', order_date)
+    month,
+    user_state,
+    case 
+        when user_state = 'Churned' then -count(*)
+        else count(*)
+    end as user_count
+from user_states_monthly
+where user_state in ('New', 'Retained', 'Reactivated', 'Resurrected', 'Churned')
+group by month, user_state
+order by month, user_state
+```
+
+
+<BarChart 
+    data={monthly_dynamics}
+    x="month"
+    y="user_count"
+    series="user_state"
+    title="Monthly Users by State"
+    colorPalette={[
+        '#1d4ed8', // Blue for Retained  
+        '#ef4444'  // Red for Churned
+    ]}
+    chartAreaHeight=280
+/>
+
+## Monthly Churn Rate
+
+```sql churn_rate
+select 
+    month,
+    sum(case when user_state = 'Churned' then 1 else 0 end) as churned_users,
+    sum(case when user_state = 'Retained' then 1 else 0 end) as retained_users,
+    sum(case when user_state = 'Churned' then 1 else 0 end) / 
+    nullif(sum(case when user_state = 'Churned' then 1 else 0 end) + 
+           sum(case when user_state = 'Retained' then 1 else 0 end), 0) as churn_rate
+from user_states_monthly
+group by month
 order by month
 ```
 
 <LineChart 
-    data={monthly_orders} 
-    x=month 
-    y=orders
-    title="Monthly Order Volume"
-    yAxisTitle="Number of Orders"
+    data={churn_rate}
+    x="month"
+    y="churn_rate"
+    title="Monthly Churn Rate: Churned / (Churned + Retained)"
+    yAxisTitle="Churn Rate"
+    yFmt=pct1
+    chartAreaHeight=280
 />
 
-## 👥 Customer Segments
 
-```sql customer_segments
+## Pulse Ratio
+
+# What it measures:
+- Pulse above 1 = More users being acquired/recovered than churning (healthy growth)
+- Pulse below 1 = More users churning than being acquired/recovered (concerning trend)
+- Pulse = 1 = Balanced - equal acquisition/recovery and churn
+
+
+
+```sql pulse_ratio
 select 
-    customer_segment,
-    count(*) as customer_count
-from jaffle_shop.customers
-group by customer_segment
-order by customer_count desc
+    month,
+    sum(case when user_state = 'New' then 1 else 0 end) as new_users,
+    sum(case when user_state = 'Reactivated' then 1 else 0 end) as reactivated_users,
+    sum(case when user_state = 'Resurrected' then 1 else 0 end) as resurrected_users,
+    sum(case when user_state = 'Churned' then 1 else 0 end) as churned_users,
+    (sum(case when user_state = 'New' then 1 else 0 end) + 
+     sum(case when user_state = 'Reactivated' then 1 else 0 end) +
+     sum(case when user_state = 'Resurrected' then 1 else 0 end)) / 
+    nullif(sum(case when user_state = 'Churned' then 1 else 0 end), 0) as pulse_ratio
+from user_states_monthly
+group by month
+order by month
 ```
 
-<BarChart 
-    data={customer_segments} 
-    x=customer_segment 
-    y=customer_count
-    title="Customer Distribution by Segment"
+<LineChart 
+    data={pulse_ratio}
+    x="month"
+    y="pulse_ratio"
+    title="Pulse Ratio: (New + Reactivated + Resurrected) / Churned"
+    yAxisTitle="Pulse Ratio"
+    chartAreaHeight=280
 />
 
-## 🛍️ Product Categories
 
-```sql product_categories
-select 
-    product_type,
-    count(*) as product_count,
-    round(avg(product_price), 2) as avg_price
-from jaffle_shop.products
-group by product_type
-order by product_count desc
+
+## Users
+
+```sql users_data
+select * from users
 ```
 
-<BarChart 
-    data={product_categories} 
-    x=product_type 
-    y=product_count
-    title="Products by Category"
-/>
-
-## 📋 Recent Orders
-
-```sql recent_orders
-select 
-    *
-from jaffle_shop.orders
-order by order_date desc
-limit 20
-```
-
-<DataTable data={recent_orders} rows=20>
-    <Column id=order_id title="Order ID"/>
-    <Column id=customer_name title="Customer"/>
-    <Column id=customer_segment title="Segment"/>
-    <Column id=order_date title="Order Date"/>
-    <Column id=order_status title="Status"/>
-    <Column id=order_total title="Order Total" fmt=usd/>
+<DataTable data={users_data}>
 </DataTable>
 
-## 🔗 Navigation
+## Transactions
 
-<div class="grid grid-cols-3 gap-4 mt-6">
-    <div class="p-4 border rounded-lg">
-        <h3 class="text-lg font-semibold">👥 Customers</h3>
-        <p class="text-sm text-gray-600 mt-2">View customer data and segments</p>
-        <a href="/customers" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">View →</a>
-    </div>
-    <div class="p-4 border rounded-lg">
-        <h3 class="text-lg font-semibold">📦 Orders</h3>
-        <p class="text-sm text-gray-600 mt-2">Browse order history and patterns</p>
-        <a href="/orders" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">View →</a>
-    </div>
-    <div class="p-4 border rounded-lg">
-        <h3 class="text-lg font-semibold">🛍️ Products</h3>
-        <p class="text-sm text-gray-600 mt-2">Explore product catalog and performance</p>
-        <a href="/products" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">View →</a>
-    </div>
-</div>
+```sql transactions_data
+select * from transactions
+```
+
+<DataTable data={transactions_data}>
+</DataTable>

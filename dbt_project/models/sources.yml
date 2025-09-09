@@ -1,86 +1,49 @@
 version: 2
 
 sources:
-  - name: raw_jaffle_shop
-    description: Raw data from the jaffle shop API via dlt
+  - name: raw_data
+    description: Raw user analytics data
+    schema: raw_data
     tables:
-      - name: customers
-        description: Customer information
+      - name: users
+        description: User information
         columns:
-          - name: id
-            description: Unique customer identifier
+          - name: user_id
+            description: Unique user identifier
             tests:
               - not_null
               - unique
           - name: name
-            description: Customer full name
+            description: User full name
+          - name: email
+            description: User email address
+          - name: age
+            description: User age
+          - name: location
+            description: User location
+          - name: created_at
+            description: User registration date
 
-      - name: orders
-        description: Order information
+      - name: transactions
+        description: Transaction information
         columns:
-          - name: id
-            description: Unique order identifier
+          - name: transaction_id
+            description: Unique transaction identifier
             tests:
               - not_null
               - unique
-          - name: customer_id
-            description: Customer who placed the order
+          - name: user_id
+            description: User who made the transaction
             tests:
               - not_null
-          - name: ordered_at
-            description: Date and time the order was placed
+              - relationships:
+                  to: source('raw_data', 'users')
+                  field: user_id
+          - name: amount
+            description: Transaction amount
+          - name: product_category
+            description: Product category
+          - name: created_at
+            description: Transaction timestamp
             tests:
               - not_null
-          - name: subtotal
-            description: Order subtotal
-          - name: tax_paid
-            description: Tax amount paid
-          - name: order_total
-            description: Total order amount
-
-      - name: products
-        description: Product catalog
-        columns:
-          - name: sku
-            description: Product SKU (unique identifier)
-            tests:
-              - not_null
-              - unique
-          - name: name
-            description: Product name
-          - name: price
-            description: Product price
-          - name: type
-            description: Product type
-          - name: description
-            description: Product description
-
-      - name: stores
-        description: Store locations
-        columns:
-          - name: id
-            description: Unique store identifier
-            tests:
-              - not_null
-              - unique
-          - name: name
-            description: Store name
-          - name: opened_at
-            description: Store opening date
-
-      - name: supplies
-        description: Supply information (supplies can be associated with multiple stores)
-        tests:
-          - unique:
-              column_name: "id || '-' || sku"
-        columns:
-          - name: id
-            description: Supply identifier (not unique - supplies can be in multiple stores)
-            tests:
-              - not_null
-          - name: name
-            description: Supply name
-          - name: cost
-            description: Supply cost
-          - name: perishable
-            description: Whether the supply is perishable

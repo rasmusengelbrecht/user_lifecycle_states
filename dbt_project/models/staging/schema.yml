@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: stg_users
+    description: "Staging table for users data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user"
+        tests:
+          - unique
+          - not_null
+      - name: created_at
+        description: "Date when the user was created"
+        tests:
+          - not_null
+
+  - name: stg_transactions
+    description: "Staging table for transactions data"
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for each transaction"
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "Foreign key to users table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: created_at
+        description: "Date when the transaction was created"
+        tests:
+          - not_null

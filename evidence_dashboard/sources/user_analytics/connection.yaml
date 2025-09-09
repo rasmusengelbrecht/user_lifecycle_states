@@ -1,0 +1,5 @@
+# This file was automatically generated
+name: user_data
+type: duckdb
+options:
+  filename: data.duckdb

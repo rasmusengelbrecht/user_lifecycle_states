@@ -1,12 +1,12 @@
 # Local Data Stack
 
-An end-to-end local data stack featuring dlt, DuckDB, dbt, and Evidence.dev for extracting, transforming, and visualizing data from the Jaffle Shop API.
+An end-to-end local data stack featuring Python data generation, DuckDB, dbt, and Evidence.dev for generating, transforming, and visualizing synthetic user and transaction data.
 
 ## 🏗️ Architecture
 
-- **dlt**: Extracts data from fast-api-jaffle-shop API
+- **Python**: Generates synthetic user and transaction data
 - **DuckDB**: Local analytical database for data storage  
-- **dbt**: Transforms raw data into staging, intermediate, and mart layers
+- **dbt**: Transforms raw data into staging and mart layers
 - **Evidence.dev**: Interactive dashboards and visualizations
 - **UV**: Python package management and virtual environments
 
@@ -16,24 +16,21 @@ An end-to-end local data stack featuring dlt, DuckDB, dbt, and Evidence.dev for 
 localdatastack/
 ├── pyproject.toml              # UV project configuration
 ├── run.sh                      # Simple execution script
-├── localdatastack/
+├── user_analytics/
 │   └── run.py                  # Main orchestration script
-├── dlt_pipeline/
-│   ├── extract.py              # dlt extraction pipeline
-│   └── .dlt/                   # dlt configuration
+├── data_generation/
+│   └── generate_data.py        # Synthetic data generation script
 ├── dbt_project/
 │   ├── dbt_project.yml
 │   ├── profiles.yml
+│   ├── data.duckdb             # DuckDB database file
 │   └── models/
 │       ├── staging/            # 1:1 with source tables
-│       ├── intermediate/       # Business logic layer
 │       └── marts/              # Final analytical models
-├── evidence_dashboard/
-│   ├── package.json
-│   ├── pages/                  # Dashboard pages
-│   └── sources/                # SQL queries for Evidence
-└── dlt_pipeline/
-    └── jaffle_shop.duckdb      # DuckDB database file
+└── evidence_dashboard/
+    ├── package.json
+    ├── pages/                  # Dashboard pages
+    └── sources/                # SQL queries for Evidence
 ```
 
 ## 🚀 Quick Start
@@ -55,7 +52,7 @@ cd localdatastack
 
 This single command will:
 1. Install all dependencies
-2. Extract data from the Jaffle Shop API
+2. Generate synthetic user and transaction data
 3. Transform data using dbt
 4. Start the Evidence dashboard at http://localhost:3000
 
@@ -67,8 +64,8 @@ You can also run individual parts of the pipeline:
 # Setup only
 ./run.sh --setup
 
-# Extract data only
-./run.sh --extract
+# Generate data only
+./run.sh --generate
 
 # Transform data only  
 ./run.sh --transform
@@ -83,35 +80,27 @@ You can also run individual parts of the pipeline:
 ## 📊 Data Models
 
 ### Staging Layer
-- `stg_customers`: Clean customer data
-- `stg_orders`: Clean order data
-- `stg_products`: Clean product catalog
-- `stg_stores`: Clean store information
-- `stg_supplies`: Clean supply data
-
-### Intermediate Layer
-- `int_customer_orders`: Joins customers with their orders
+- `stg_users`: Clean user data from generated CSV
+- `stg_transactions`: Clean transaction data from generated CSV
 
 ### Marts Layer
-- `dim_customers`: Customer dimension with segments and metrics
-- `dim_products`: Product dimension with price tiers
-- `fct_orders`: Order facts with customer context
+- `dim_users`: User dimension with behavioral metrics and segmentation
+- `fct_transactions`: Transaction facts with user context and derived metrics
 
 ## 🎯 Dashboard Features
 
 The Evidence dashboard includes:
 
-- **Overview**: Key metrics and trends
-- **Customer Analysis**: Segmentation, cohorts, and behavior
-- **Order Analysis**: Status distribution, patterns by day/time
-- **Product Analysis**: Catalog overview, price distribution
+- **Overview**: User activation rates and behavioral segmentation
+- **User Analysis**: Detailed user metrics and activation patterns
+- **Transaction Analysis**: Transaction patterns and timing analysis
 
 ## 🔧 Development
 
-### Manual dlt Pipeline
+### Manual Data Generation
 ```bash
-cd dlt_pipeline
-uv run python extract.py
+cd data_generation
+uv run python generate_data.py
 ```
 
 ### Manual dbt Runs
@@ -140,21 +129,20 @@ uv run dbt run --full-refresh
 
 ## 📝 Configuration
 
-### dlt Configuration
-- API endpoint: `https://jaffle-shop.dlthub.com/`
-- Database: `dlt_pipeline/jaffle_shop.duckdb`
-- Schemas: Raw data loaded to `raw_jaffle_shop` schema
+### Data Generation
+- Generates 1000 synthetic users with realistic behavior patterns
+- Creates transactions spanning 2022 with various user segments
+- Output: Raw data in DuckDB `raw_data` schema
 
 ### dbt Configuration  
-- Database: DuckDB at `../dlt_pipeline/jaffle_shop.duckdb`
+- Database: DuckDB at `data.duckdb`
 - Target: `dev` environment
 - Materializations:
   - Staging: `view`
-  - Intermediate: `view`  
   - Marts: `table`
 
 ### Evidence Configuration
-- Database: DuckDB connection to `../dlt_pipeline/jaffle_shop.duckdb`
+- Database: DuckDB connection to `../dbt_project/data.duckdb`
 - Layout: Sidebar navigation
 
 ## 🛠️ Troubleshooting
@@ -170,21 +158,21 @@ uv run dbt run --full-refresh
 
 ```bash
 # Remove database and start fresh
-rm -f dlt_pipeline/jaffle_shop.duckdb
+rm -f dbt_project/data.duckdb
 ./run.sh
 ```
 
 ## 🎨 Customization
 
-- **Add new data sources**: Modify `dlt_pipeline/extract.py`
+- **Modify data generation**: Edit `data_generation/generate_data.py` to change user behaviors or data volume
 - **Create new models**: Add SQL files to `dbt_project/models/`
 - **Add dashboard pages**: Create new `.md` files in `evidence_dashboard/pages/`
 - **Modify visualizations**: Edit existing pages or create new components
 
 ## 📚 Learn More
 
-- [dlt Documentation](https://dlthub.com/docs)
 - [dbt Documentation](https://docs.getdbt.com/)
 - [DuckDB Documentation](https://duckdb.org/docs/)
 - [Evidence Documentation](https://evidence.dev/docs)
 - [UV Documentation](https://docs.astral.sh/uv/)
+- [pandas Documentation](https://pandas.pydata.org/docs/)

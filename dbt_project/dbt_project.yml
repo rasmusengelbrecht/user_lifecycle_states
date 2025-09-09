@@ -1,9 +1,9 @@
-name: 'jaffle_shop_analytics'
+name: 'user_analytics'
 version: '1.0.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'jaffle_shop_analytics'
+profile: 'user_analytics'
 
 # These configurations specify where dbt should look for different types of files.
 model-paths: ["models"]
@@ -18,7 +18,7 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  jaffle_shop_analytics:
+  user_analytics:
     # Config indicated by + and applies to all files under models/example/
     staging:
       +materialized: view
