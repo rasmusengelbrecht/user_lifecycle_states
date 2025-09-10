@@ -35,6 +35,8 @@ from monthly_totals
     chartAreaHeight=280
 />
 
+## Monthly Dynamics
+
 ```sql monthly_dynamics
 select 
     month,
@@ -91,7 +93,7 @@ order by month
 
 ## Pulse Ratio
 
-# What it measures:
+What it measures:
 - Pulse above 1 = More users being acquired/recovered than churning (healthy growth)
 - Pulse below 1 = More users churning than being acquired/recovered (concerning trend)
 - Pulse = 1 = Balanced - equal acquisition/recovery and churn
@@ -124,8 +126,19 @@ order by month
 />
 
 
+## The underlying data
 
-## Users
+### user_states_monthly
+
+```sql user_states_monthly
+select * from user_states_monthly
+```
+
+<DataTable data={user_states_monthly}>
+</DataTable>
+
+
+### Users
 
 ```sql users_data
 select * from users
@@ -134,7 +147,7 @@ select * from users
 <DataTable data={users_data}>
 </DataTable>
 
-## Transactions
+### Transactions
 
 ```sql transactions_data
 select * from transactions

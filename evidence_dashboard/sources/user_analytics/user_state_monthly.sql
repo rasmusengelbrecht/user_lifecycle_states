@@ -1,1 +1,0 @@
-select * from main.mart_user_state_monthly
