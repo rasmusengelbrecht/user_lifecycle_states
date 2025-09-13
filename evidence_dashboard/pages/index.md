@@ -132,6 +132,7 @@ order by month
     <ReferenceArea yMin=1 yMax=10 label="Healthy (Pulse > 1)" color=positive labelPosition=center/>
     <ReferenceArea yMin=0 yMax=1 label="Concerning (Pulse < 1)" color=negative labelPosition=center/>
     <ReferenceLine y=1 label="Break-even (Pulse = 1)" labelPosition=aboveStart/>
+    <Callout x="2022-10-01" y=1.44 label="Increased churn, drop in new users" labelPosition=bottom/>
 </LineChart>
 
 
