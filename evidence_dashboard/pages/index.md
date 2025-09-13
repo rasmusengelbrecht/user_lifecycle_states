@@ -80,14 +80,18 @@ group by month
 order by month
 ```
 
-<LineChart 
+<BarChart 
     data={churn_rate}
     x="month"
-    y="churn_rate"
+    y="churned_users"
+    y2="churn_rate"
     title="Monthly Churn Rate: Churned / (Churned + Retained)"
-    yAxisTitle="Churn Rate"
-    yFmt=pct1
+    yAxisTitle="# Churned Users"
+    y2AxisTitle="Churn Rate"
+    y2Fmt=pct
+    y2SeriesType=line
     chartAreaHeight=280
+    labels=true
 />
 
 
@@ -112,6 +116,7 @@ select
      sum(case when user_state = 'Resurrected' then 1 else 0 end)) / 
     nullif(sum(case when user_state = 'Churned' then 1 else 0 end), 0) as pulse_ratio
 from user_states_monthly
+where month >= '2022-03-01'
 group by month
 order by month
 ```
@@ -123,7 +128,11 @@ order by month
     title="Pulse Ratio: (New + Reactivated + Resurrected) / Churned"
     yAxisTitle="Pulse Ratio"
     chartAreaHeight=280
-/>
+>
+    <ReferenceArea yMin=1 yMax=10 label="Healthy (Pulse > 1)" color=positive labelPosition=center/>
+    <ReferenceArea yMin=0 yMax=1 label="Concerning (Pulse < 1)" color=negative labelPosition=center/>
+    <ReferenceLine y=1 label="Break-even (Pulse = 1)" labelPosition=aboveStart/>
+</LineChart>
 
 
 ## The underlying data
