@@ -15,26 +15,23 @@ This semantic layer provides a SQL-free interface to query user lifecycle metric
 
 ### Prerequisites
 
-- Python 3.9+
-- DuckDB database with user_states_monthly table
+- [UV](https://docs.astral.sh/uv/) installed
+- DuckDB database with user_states_monthly table (created by parent project)
 
 ### Installation
 
-Install the required dependencies:
+All dependencies are managed by UV via the parent project's `pyproject.toml`. Simply run:
 
 ```bash
-pip install boring-semantic-layer ibis-framework[duckdb] streamlit plotly
+# From the project root (user_lifecycle_states/)
+./run.sh semantic
 ```
 
-## Usage
-
-### Streamlit App
-
-Run the interactive Streamlit app:
+Or run directly:
 
 ```bash
-cd semantic_layer
-streamlit run app.py
+# From semantic_layer directory
+uv run streamlit run app.py
 ```
 
 The app will open in your browser at `http://localhost:8501`.
@@ -49,14 +46,7 @@ The app will open in your browser at `http://localhost:8501`.
 
 ### MCP Server
 
-Run the MCP server to expose metrics via the Model Context Protocol:
-
-```bash
-cd semantic_layer
-python mcp_server.py
-```
-
-This allows AI assistants like Claude to query your user lifecycle metrics directly.
+The MCP server exposes metrics via the Model Context Protocol, allowing AI assistants like Claude to query your user lifecycle metrics directly.
 
 **Adding to Claude Desktop:**
 
@@ -66,12 +56,14 @@ Add this to your Claude Desktop config (`~/Library/Application Support/Claude/cl
 {
   "mcpServers": {
     "user-lifecycle": {
-      "command": "python",
-      "args": ["/absolute/path/to/semantic_layer/mcp_server.py"]
+      "command": "/absolute/path/to/user_lifecycle_states/.venv/bin/python",
+      "args": ["/absolute/path/to/user_lifecycle_states/semantic_layer/mcp_server.py"]
     }
   }
 }
 ```
+
+Replace `/absolute/path/to` with your actual project path. Restart Claude Desktop after updating the config.
 
 ## Architecture
 
