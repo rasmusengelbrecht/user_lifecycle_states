@@ -67,7 +67,7 @@ You can also run individual parts of the pipeline:
 # Generate data only
 ./run.sh --generate
 
-# Transform data only  
+# Transform data only
 ./run.sh --transform
 
 # Start dashboard only
@@ -75,6 +75,9 @@ You can also run individual parts of the pipeline:
 
 # Skip setup (if already done)
 ./run.sh --skip-setup
+
+# Start semantic layer app (SQL-free query interface)
+./run.sh semantic
 ```
 
 ## 📊 Data Models
@@ -112,6 +115,27 @@ The Evidence dashboard provides comprehensive user lifecycle analytics:
 - **Resurrected**: Users who returned after 2+ months of inactivity
 - **Dormant**: Users who remain inactive after churning
 - **Never Activated**: Users who never had any transactions
+
+## 🔍 Semantic Layer
+
+A lightweight SQL-free interface for querying user lifecycle metrics using the [boring-semantic-layer](https://github.com/boringdata/boring-semantic-layer) library. Query metrics like MAU, churn rate, and pulse ratio without writing any SQL.
+
+**Features:**
+- Interactive Streamlit app with visualizations
+- MCP server for AI assistant integration (Claude Desktop)
+- 11 predefined metrics (MAU, churn rate, pulse ratio, user states, etc.)
+- Time-based grouping (month, quarter, year) and filtering
+
+**Usage:**
+```bash
+# Start the semantic layer app
+./run.sh semantic
+
+# Or run the Streamlit interface directly
+cd semantic_layer && streamlit run app.py
+```
+
+See [semantic_layer/README.md](semantic_layer/README.md) for full documentation.
 
 ## 🔧 Development
 

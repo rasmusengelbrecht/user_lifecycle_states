@@ -1,0 +1,55 @@
+user_lifecycle:
+  table: user_states_monthly_table
+  description: "User lifecycle metrics tracking monthly active users, churn, and user state transitions"
+  time_dimension: month
+  smallest_time_grain: TIME_GRAIN_MONTH
+
+  dimensions:
+    user_state:
+      expr: _.user_state
+      description: "Current state of the user: 'New' (first-time active), 'Retained' (active in previous month and current), 'Reactivated' (returned after 1 month), 'Resurrected' (returned after 2+ months), 'Churned' (active in previous month but not current), or 'Dormant' (inactive)"
+
+  measures:
+    total_users:
+      expr: _.user_id.count()
+      description: "Total number of users in the period"
+
+    active_users:
+      expr: _.user_id.count(where=_.is_active == True)
+      description: "Monthly Active Users (MAU): Number of users who were active during the month"
+
+    mau_percentage:
+      expr: _.user_id.count(where=_.is_active == True) / _.user_id.count().nullif(0)
+      description: "MAU Percentage: Percentage of total users who were active in the month"
+
+    new_users:
+      expr: _.user_id.count(where=_.user_state == "New")
+      description: "Number of new users who became active for the first time"
+
+    retained_users:
+      expr: _.user_id.count(where=_.user_state == "Retained")
+      description: "Number of users who remained active from the previous month"
+
+    reactivated_users:
+      expr: _.user_id.count(where=_.user_state == "Reactivated")
+      description: "Number of users who returned after being inactive for 1 month"
+
+    resurrected_users:
+      expr: _.user_id.count(where=_.user_state == "Resurrected")
+      description: "Number of users who returned after being inactive for 2+ months"
+
+    churned_users:
+      expr: _.user_id.count(where=_.user_state == "Churned")
+      description: "Number of users who were active in the previous month but not in the current month"
+
+    dormant_users:
+      expr: _.user_id.count(where=_.user_state == "Dormant")
+      description: "Number of users who remain inactive"
+
+    churn_rate:
+      expr: _.user_id.count(where=_.user_state == "Churned") / (_.user_id.count(where=_.user_state == "Churned") + _.user_id.count(where=_.user_state == "Retained")).nullif(0)
+      description: "Churn Rate: Churned users divided by (Churned + Retained) users"
+
+    pulse_ratio:
+      expr: (_.user_id.count(where=_.user_state == "New") + _.user_id.count(where=_.user_state == "Reactivated") + _.user_id.count(where=_.user_state == "Resurrected")) / _.user_id.count(where=_.user_state == "Churned").nullif(0)
+      description: "Pulse Ratio: (New + Reactivated + Resurrected) / Churned. Values >1 indicate healthy growth, <1 indicate concerning trends"
